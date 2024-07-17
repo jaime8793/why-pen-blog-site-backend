@@ -27,15 +27,16 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new post
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const post = new Post(req.body);
     await post.save();
     res.status(201).json(post);
   } catch (error) {
-    res.status(500).json({ message: "Error creating post" });
+    res.status(500).json({ message: 'Error creating post', error });
   }
 });
+
 
 // Update a post
 router.put("/:id", async (req, res) => {
