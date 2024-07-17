@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.post("/register", async (req, res) => {
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error registering user", error });
+    res.status(500).json({ message: "Error registering user" });
   }
 });
 
@@ -28,13 +29,35 @@ router.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { userId: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
     res.json({ token });
   } catch (error) {
-    res.status(500).json({ message: "Error logging in", error });
+    res.status(500).json({ message: "Error logging in" });
   }
 });
+
+// Make a user an admin
+router.post(
+  "/make-admin/:id",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      user.isAdmin = true;
+      await user.save();
+      res.json({ message: "User is now an admin" });
+    } catch (error) {
+      res.status(500).json({ message: "Error making user an admin" });
+    }
+  }
+);
 
 module.exports = router;
