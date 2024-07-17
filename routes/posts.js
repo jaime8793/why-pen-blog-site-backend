@@ -1,66 +1,68 @@
 const express = require("express");
-const router = express.Router();
 const Post = require("../models/Post");
-const { authMiddleware } = require("./auth");
+
+const router = express.Router();
 
 // Get all posts
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.json(posts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching posts" });
   }
 });
 
 // Get a single post
-router.get("/:id", getPost, (req, res) => {
-  res.json(res.post);
-});
-
-// Create a post (protected)
-router.post("/", authMiddleware, async (req, res) => {
-  const post = new Post({
-    title: req.body.title,
-    content: req.body.content,
-    snippet: req.body.content.substring(0, 150) + "...",
-    author: req.body.author,
-    category: req.body.category,
-    tags: req.body.tags,
-    image: req.body.image,
-  });
-
+router.get("/:id", async (req, res) => {
   try {
-    const newPost = await post.save();
-    res.status(201).json(newPost);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a post (protected)
-router.delete("/:id", authMiddleware, getPost, async (req, res) => {
-  try {
-    await res.post.remove();
-    res.json({ message: "Post deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-async function getPost(req, res, next) {
-  let post;
-  try {
-    post = await Post.findById(req.params.id);
-    if (post == null) {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching post" });
   }
+});
 
-  res.post = post;
-  next();
-}
+// Create a new post
+router.post("/", async (req, res) => {
+  try {
+    const post = new Post(req.body);
+    await post.save();
+    res.status(201).json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Error creating post" });
+  }
+});
+
+// Update a post
+router.put("/:id", async (req, res) => {
+  try {
+    const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating post" });
+  }
+});
+
+// Delete a post
+router.delete("/:id", async (req, res) => {
+  try {
+    const post = await Post.findByIdAndDelete(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting post" });
+  }
+});
 
 module.exports = router;
