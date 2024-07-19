@@ -14,6 +14,7 @@ router.post("/register", async (req, res) => {
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
+    console.error("Error registering user:", error);
     res.status(500).json({ message: "Error registering user" });
   }
 });
@@ -30,12 +31,13 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign(
-      { userId: user._id, isAdmin: user.isAdmin },
+      { userId: user._id, username: user.username, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "10h" }
     );
-    res.json({ token });
+    res.json({ token, isAdmin: user.isAdmin });
   } catch (error) {
+    console.error("Error logging in:", error);
     res.status(500).json({ message: "Error logging in" });
   }
 });
@@ -55,6 +57,7 @@ router.post(
       await user.save();
       res.json({ message: "User is now an admin" });
     } catch (error) {
+      console.error("Error making user an admin:", error);
       res.status(500).json({ message: "Error making user an admin" });
     }
   }
