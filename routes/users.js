@@ -42,6 +42,26 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // or whatever limit you want
+    const skip = (page - 1) * limit;
+
+    const users = await User.find().skip(skip).limit(limit);
+    const total = await User.countDocuments();
+
+    res.json({
+      users,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    next(error); // Pass errors to the error handling middleware
+  }
+});
+
+
 // Make a user an admin
 router.post(
   "/make-admin/:id",
