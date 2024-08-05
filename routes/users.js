@@ -8,6 +8,28 @@ const router = express.Router();
 
 router.post("/register", async (req, res) => {
   try {
+    const { username, email, password } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Username or email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, email, password: hashedPassword });
+    await user.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("Error registering user:", error);
+    res.status(500).json({ message: "Error registering user" });
+  }
+});
+
+router.post("/register", async (req, res) => {
+  try {
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword });
@@ -61,24 +83,69 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// Make a user an admin
+// router.post(
+//   "/make-admin/:id",
+//   authMiddleware,
+//   adminMiddleware,
+//   async (req, res) => {
+//     try {
+//       const user = await User.findById(req.params.id);
+//       if (!user) {
+//         return res.status(404).json({ message: "User not found" });
+//       }
+//       user.isAdmin = true;
+//       await user.save();
+//       res.json({ message: "User is now an admin" });
+//     } catch (error) {
+//       console.error("Error making user an admin:", error);
+//       res.status(500).json({ message: "Error making user an admin" });
+//     }
+//   }
+// );
 
 // Make a user an admin
-router.post(
+router.put(
   "/make-admin/:id",
   authMiddleware,
   adminMiddleware,
   async (req, res) => {
     try {
-      const user = await User.findById(req.params.id);
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { isAdmin: true },
+        { new: true }
+      );
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      user.isAdmin = true;
-      await user.save();
       res.json({ message: "User is now an admin" });
     } catch (error) {
       console.error("Error making user an admin:", error);
       res.status(500).json({ message: "Error making user an admin" });
+    }
+  }
+);
+
+// Remove admin status from a user
+router.put(
+  "/remove-admin/:id",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { isAdmin: false },
+        { new: true }
+      );
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ message: "Admin status removed from user" });
+    } catch (error) {
+      console.error("Error removing admin status:", error);
+      res.status(500).json({ message: "Error removing admin status" });
     }
   }
 );
