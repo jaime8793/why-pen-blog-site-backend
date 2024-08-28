@@ -127,7 +127,7 @@ router.put(
   }
 );
 
-// Remove admin status from a user
+// Remove admin status from a user functionality
 router.put(
   "/remove-admin/:id",
   authMiddleware,
