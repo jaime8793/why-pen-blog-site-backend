@@ -22,7 +22,6 @@ router.post("/login", async (req, res) => {
         expiresIn: "1h",
       }
     );
-    //test
     
     res.json({ token });
   } catch (err) {
@@ -30,7 +29,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Verify token middleware
 function authMiddleware(req, res, next) {
   const token = req.header("Authorization").replace("Bearer ", "");
 
@@ -47,5 +45,4 @@ function authMiddleware(req, res, next) {
   }
 }
 
-//module.exports = router;
-//module.exports.authMiddleware = authMiddleware;
+
