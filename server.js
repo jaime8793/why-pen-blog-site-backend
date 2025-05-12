@@ -6,12 +6,13 @@ require("dotenv").config();
 const app = express();
 
 const corsOptions = {
-  origin: "https://why-pen-blog-site-frontend.vercel.app/", // Allow requests from your frontend
-  methods: "POST,OPTIONS,GET", // Allow POST and OPTIONS requests
-  allowedHeaders: "Content-Type,Authorization", // Allow these headers
-  credentials: true, // Allow sending cookies, if needed
+  origin: function (origin, callback) {
+    callback(null, origin); // Reflect request origin
+  },
+  methods: "POST,OPTIONS,GET",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true,
 };
-// Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.json({ limit: "1mb" }));
