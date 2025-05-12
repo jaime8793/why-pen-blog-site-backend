@@ -1,4 +1,6 @@
 // Login
+const User = require("../models/User");
+
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
