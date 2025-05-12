@@ -6,7 +6,7 @@ require("dotenv").config();
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3001", // Allow requests from your frontend
+  origin: "https://why-pen-blog-site-frontend.vercel.app/", // Allow requests from your frontend
   methods: "POST,OPTIONS,GET", // Allow POST and OPTIONS requests
   allowedHeaders: "Content-Type,Authorization", // Allow these headers
   credentials: true, // Allow sending cookies, if needed
