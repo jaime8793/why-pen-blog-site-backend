@@ -7,12 +7,23 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
+const allowedOrigins = ["http://localhost:3001"];
+
 app.use(
   cors({
-    origin: "http://localhost:3001",
-    credentials: true, 
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Allow all other origins
+      return callback(null, true);
+    },
+    credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.json({ limit: "1mb" }));
 
