@@ -37,7 +37,8 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
 // Routes
-app.use("/api/users", require("./routes/users"));
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
 app.use("/api/posts", require("./routes/posts"));
 app.use("/api/categories", require("./routes/categories"));
 
