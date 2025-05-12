@@ -1,29 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const router = require("./routes/users");
 require("dotenv").config();
 
 const app = express();
 
 // Middleware
-const allowedOrigins = ["http://localhost:3001"];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      // Allow all other origins
-      return callback(null, true);
-    },
+    origin: "http://localhost:3001",
     credentials: true,
   })
 );
-
 app.use(express.json());
 app.use(express.json({ limit: "1mb" }));
 
@@ -37,8 +25,7 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
-app.use("/api/users", userRoutes);
+app.use("/api/users", require("./routes/users"));
 app.use("/api/posts", require("./routes/posts"));
 app.use("/api/categories", require("./routes/categories"));
 
